@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>MCP Feed Basics Co. - Dashboard</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Playfair+Display:wght@700;800&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="dashboard.css">
+</head>
+<body>
+<header class="header">
+  <div class="container">
+    <div class="dashboard-navbar">
+
+      <a href="dashboard.html" class="logo">
+        <img src="img/logo.jpg" alt="MCP Logo">
+      </a>
+
+      
+      <div class="dashboard-nav-links">
+        <a href="#" class="top-nav-link active" data-nav="home" onclick="showSection('homeSection'); setTopNav(this); return false;">Home</a>
+        <a href="#" class="top-nav-link" data-nav="products" onclick="showSection('productsSection'); setTopNav(this); return false;">Shop</a>
+        <a href="#" class="top-nav-link" data-nav="contact" onclick="scrollToContact(); setTopNav(this); return false;">Contact</a>
+      </div>
+
+      <div class="dashboard-nav-actions">
+        <button class="icon-btn cart-trigger" id="cartToggle" title="Cart">
+          🛒
+          <span class="cart-count" id="cartCount">0</span>
+        </button>
+
+        <button class="icon-btn notif-btn" id="notifToggle" title="Notifications">
+          🔔
+          <span class="cart-count" id="notifCount">2</span>
+        </button>
+
+        <div class="account-area">
+          <button class="account-btn" id="accountToggle">
+            <span class="account-avatar">C</span>
+            <span>My Account</span>
+          </button>
+
+          <div class="account-dropdown" id="accountDropdown">
+            <div class="dropdown-title">My Account</div>
+            <a href="#" class="dropdown-link" onclick="showSection('ordersSection'); return false;">My Orders</a>
+            <a href="#" class="dropdown-link" onclick="showSection('paymentsSection'); return false;">Payments</a>
+            <a href="#" class="dropdown-link" onclick="showSection('profileSection'); return false;">Profile</a>
+            <a href="#" class="dropdown-link" onclick="showSection('addressSection'); return false;">Address Book</a>
+            <a href="#" class="dropdown-link" onclick="showSection('notificationsSection'); return false;">Notifications</a>
+            <a href="#" class="dropdown-link" onclick="showSection('supportSection'); return false;">Support / Help</a>
+            <a href="#" class="dropdown-link logout-link" onclick="logoutUser(); return false;">Log Out</a>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</header>
+  <div class="container">
+    <div class="top-note">
+      Browse our best-selling items. <strong>Welcome back!</strong> Check promos, add products to your cart, and place orders easily.
+    </div>
+
+    <div class="dashboard-layout">
+      <main class="main-panel">
+
+        <section id="homeSection" class="page-section">
+          <div class="promo-slider">
+            <div class="promo-bg" id="promoBg"></div>
+
+            <div class="promo-overlay">
+              <div class="badge">📍 EST. SAN JOSE, BATANGAS</div>
+              <h1 class="promo-title">Your Community’s <em>Trusted</em> Store</h1>
+              <p class="promo-desc">From fresh produce to daily essentials — shop smarter, live better.</p>
+
+              <div class="feature-row">
+                <div class="feature-pill">🥬 Fresh Daily</div>
+                <div class="feature-pill">🚚 Fast Delivery</div>
+                <div class="feature-pill">🏷 Member Savings</div>
+              </div>
+
+              <div class="slide-actions">
+                <button class="btn-primary" onclick="showSection('productsSection')">Browse Products</button>
+                <button class="btn-outline" onclick="showSection('ordersSection')">My Orders</button>
+              </div>
+            </div>
+
+            <div class="slider-dots">
+              <div class="dot active" onclick="goToSlide(0)"></div>
+              <div class="dot" onclick="goToSlide(1)"></div>
+              <div class="dot" onclick="goToSlide(2)"></div>
+            </div>
+          </div>
+
+          <div class="shop-toolbar">
+            <div class="toolbar-top">
+              <div class="toolbar-title">Product Categories</div>
+            </div>
+
+            <div class="categories-row top-categories">
+              <button class="cat-btn active" onclick="filterProducts('all', this)">All</button>
+              <button class="cat-btn" onclick="filterProducts('Dairy', this)">Dairy</button>
+              <button class="cat-btn" onclick="filterProducts('Beverages', this)">Beverages</button>
+              <button class="cat-btn" onclick="filterProducts('Drinks', this)">Drinks</button>
+              <button class="cat-btn" onclick="filterProducts('Softdrinks', this)">Softdrinks</button>
+              <button class="cat-btn" onclick="filterProducts('Snacks', this)">Snacks</button>
+              <button class="cat-btn" onclick="filterProducts('Pantry', this)">Pantry</button>
+              <button class="cat-btn" onclick="filterProducts('Frozen Food', this)">Frozen Food</button>
+              <button class="cat-btn" onclick="filterProducts('Spreads', this)">Spreads</button>
+              <button class="cat-btn" onclick="filterProducts('Hygiene', this)">Hygiene</button>
+              <button class="cat-btn" onclick="filterProducts('Cleaning', this)">Cleaning</button>
+            </div>
+
+            <div class="toolbar-search">
+              <span>🔍</span>
+              <input type="text" id="productSearch" placeholder="Search items in dashboard..." autocomplete="off">
+            </div>
+          </div>
+
+          <div class="products-grid" id="productsGrid"></div>
+        </section>
+
+        <section id="productsSection" class="page-section hidden">
+          <div class="content-card">
+            <div class="section-head">
+              <h2>Products</h2>
+              <div class="muted">Browse available products and add to cart.</div>
+            </div>
+
+            <div class="categories-row top-categories" style="margin-bottom:16px;">
+              <button class="cat-btn active" onclick="filterProducts('all', this)">All</button>
+              <button class="cat-btn" onclick="filterProducts('Dairy', this)">Dairy</button>
+              <button class="cat-btn" onclick="filterProducts('Beverages', this)">Beverages</button>
+              <button class="cat-btn" onclick="filterProducts('Drinks', this)">Drinks</button>
+              <button class="cat-btn" onclick="filterProducts('Softdrinks', this)">Softdrinks</button>
+              <button class="cat-btn" onclick="filterProducts('Snacks', this)">Snacks</button>
+              <button class="cat-btn" onclick="filterProducts('Pantry', this)">Pantry</button>
+              <button class="cat-btn" onclick="filterProducts('Frozen Food', this)">Frozen Food</button>
+              <button class="cat-btn" onclick="filterProducts('Spreads', this)">Spreads</button>
+              <button class="cat-btn" onclick="filterProducts('Hygiene', this)">Hygiene</button>
+              <button class="cat-btn" onclick="filterProducts('Cleaning', this)">Cleaning</button>
+            </div>
+
+            <div class="toolbar-search" style="margin-bottom:16px;">
+              <span>🔍</span>
+              <input type="text" id="productSearch2" placeholder="Search products..." autocomplete="off">
+            </div>
+
+            <div class="products-grid" id="productsGrid2"></div>
+          </div>
+        </section>
+
+        <section id="ordersSection" class="page-section hidden">
+          <div class="content-card">
+            <div class="section-head">
+              <h2>My Orders</h2>
+              <div class="muted">History ng orders, status, at order details.</div>
+            </div>
+
+            <table>
+              <thead>
+                <tr>
+                  <th>Order ID</th>
+                  <th>Date</th>
+                  <th>Status</th>
+                  <th>Items</th>
+                  <th>Total</th>
+                  <th>Order Details</th>
+                </tr>
+              </thead>
+              <tbody id="ordersTableBody"></tbody>
+            </table>
+          </div>
+        </section>
+
+        <section id="paymentsSection" class="page-section hidden">
+          <div class="content-card">
+            <div class="section-head">
+              <h2>Payments</h2>
+              <div class="muted">Payment methods and payment history.</div>
+            </div>
+
+            <div class="two-col">
+              <div>
+                <div class="payment-card">
+                  <div class="pay-top">
+                    <div>
+                      <h4>GCash</h4>
+                      <p class="muted">Fast mobile wallet payment</p>
+                    </div>
+                    <span class="default-badge">Available</span>
+                  </div>
+                </div>
+
+                <div class="payment-card">
+                  <div class="pay-top">
+                    <div>
+                      <h4>Cash on Delivery</h4>
+                      <p class="muted">Pay when your order arrives</p>
+                    </div>
+                    <span class="default-badge">Available</span>
+                  </div>
+                </div>
+
+                <div class="payment-card">
+                  <div class="pay-top">
+                    <div>
+                      <h4>Card</h4>
+                      <p class="muted">Debit or Credit Card payment</p>
+                    </div>
+                    <span class="default-badge">Available</span>
+                  </div>
+                </div>
+              </div>
+
+              <div>
+                <div class="payment-card">
+                  <h4 style="margin-bottom:12px;">Payment History</h4>
+                  <p class="muted">Orders are now coming from database.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section id="profileSection" class="page-section hidden">
+          <div class="content-card">
+            <div class="section-head">
+              <h2>Profile / Account Settings</h2>
+              <div class="muted">Edit name, email, and password.</div>
+            </div>
+
+            <div class="form-grid">
+              <div class="form-group">
+                <label>Full Name</label>
+                <input type="text" id="profileFullName" placeholder="Your full name">
+              </div>
+
+              <div class="form-group">
+                <label>Email Address</label>
+                <input type="email" id="profileEmail" placeholder="Your email">
+              </div>
+
+              <div class="form-group">
+                <label>Role</label>
+                <input type="text" id="profileRole" readonly>
+              </div>
+
+              <div class="form-group">
+                <label>Status</label>
+                <input type="text" id="profileStatus" readonly>
+              </div>
+
+              <div class="form-group">
+                <label>Current Password</label>
+                <input type="password" id="currentPassword" placeholder="Enter current password">
+              </div>
+
+              <div class="form-group">
+                <label>New Password</label>
+                <input type="password" id="newPassword" placeholder="Enter new password">
+              </div>
+            </div>
+
+            <div style="display:flex; gap:12px; flex-wrap:wrap; margin-top:16px;">
+              <button class="save-btn" id="saveProfileBtn">Save Profile</button>
+              <button class="save-btn" id="changePasswordBtn">Change Password</button>
+            </div>
+          </div>
+        </section>
+
+        <section id="addressSection" class="page-section hidden">
+          <div class="content-card">
+            <div class="section-head">
+              <h2>Address Book</h2>
+              <div class="muted">Save multiple addresses and set default address.</div>
+            </div>
+
+            <div class="address-card">
+              <div class="address-top">
+                <div>
+                  <h4>Home Address</h4>
+                  <p class="muted">Block 1, Lot 2, Brgy. Sample, San Jose, Batangas</p>
+                </div>
+                <span class="default-badge">Default</span>
+              </div>
+              <button class="small-btn">Edit Address</button>
+            </div>
+          </div>
+        </section>
+
+        <section id="notificationsSection" class="page-section hidden">
+          <div class="content-card">
+            <div class="section-head">
+              <h2>Notifications</h2>
+              <div class="muted">Order updates and promo alerts.</div>
+            </div>
+            <div id="notificationsList"></div>
+          </div>
+        </section>
+
+        <section id="supportSection" class="page-section hidden">
+          <div class="content-card">
+            <div class="section-head">
+              <h2>Support / Help</h2>
+              <div class="muted">Contact support and FAQs.</div>
+            </div>
+
+            <div class="faq-card">
+              <h4>Contact Support</h4>
+              <p class="muted">Email: support@mcpfeedbasics.com</p>
+              <p class="muted">Phone: 0912-345-6789</p>
+            </div>
+          </div>
+        </section>
+
+      </main>
+    </div>
+  </div>
+
+  <footer class="contact-footer" id="contactFooter">
+    <div class="contact-footer-inner">
+      <div class="contact-left">
+        <div class="contact-badge">GET IN TOUCH</div>
+        <h2>Contact Us</h2>
+      </div>
+
+      <div class="contact-grid">
+        <div class="contact-item">
+          <div class="contact-icon">📍</div>
+          <div>
+            <h4>Address</h4>
+            <p>Pinagtung-ulan Rd, Balagtasin,<br>San Jose, Batangas</p>
+          </div>
+        </div>
+
+        <div class="contact-item">
+          <div class="contact-icon">📞</div>
+          <div>
+            <h4>Phone / Delivery</h4>
+            <p>0963-705-3286<br>Calls & SMS accepted</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <div class="cart-overlay" id="cartOverlay"></div>
+
+  <aside class="cart-drawer" id="cartDrawer">
+    <div class="cart-drawer-header">
+      <h2>My Cart</h2>
+      <button class="cart-close-btn" id="cartCloseBtn">×</button>
+    </div>
+
+    <div class="cart-drawer-body">
+      <div class="cart-list" id="cartItems"></div>
+    </div>
+
+    <div class="cart-drawer-footer">
+      <div class="cart-summary">
+        <div class="summary-row">
+          <span>Subtotal</span>
+          <span id="subtotal">₱0.00</span>
+        </div>
+        <div class="summary-row">
+          <span>VAT (12%)</span>
+          <span id="vatAmount">₱0.00</span>
+        </div>
+        <div class="summary-row">
+          <span>Shipping Fee</span>
+          <span id="shippingFee">₱0.00</span>
+        </div>
+        <div class="summary-row">
+          <span>Promo Discount</span>
+          <span id="promoDiscount">- ₱0.00</span>
+        </div>
+        <div class="summary-row total">
+          <span>Total</span>
+          <span id="grandTotal">₱0.00</span>
+        </div>
+
+        <button class="checkout-btn" onclick="openCheckout()">Checkout</button>
+      </div>
+    </div>
+  </aside>
+
+  <div class="modal" id="checkoutModal">
+    <div class="modal-content">
+      <div class="modal-head">
+        <div>
+          <h2 style="margin-bottom:4px;">Checkout</h2>
+          <p class="muted">Choose your payment method and delivery details</p>
+        </div>
+        <button class="close-btn" onclick="closeCheckout()">×</button>
+      </div>
+
+      <div style="margin-bottom:16px;">
+        <label style="display:block; margin-bottom:6px; font-weight:600;">Delivery Address</label>
+        <textarea id="checkoutAddress" rows="3" style="width:100%; padding:12px; border:1px solid #ddd; border-radius:10px;" placeholder="Enter your full delivery address"></textarea>
+      </div>
+
+      <div style="margin-bottom:16px;">
+        <label style="display:block; margin-bottom:6px; font-weight:600;">Promo Code</label>
+        <div style="display:flex; gap:10px;">
+          <input type="text" id="promoCode" placeholder="Enter promo code" style="flex:1; padding:12px; border:1px solid #ddd; border-radius:10px;" autocomplete="off">
+          <button type="button" class="small-btn" onclick="applyPromo()">Apply</button>
+        </div>
+        <div id="promoMsg" style="margin-top:8px; font-size:.9rem;"></div>
+      </div>
+
+      <div class="payment-options">
+        <div class="payment-option active" onclick="selectPayment(this, 'GCash')">
+          <div>
+            <h4>GCash</h4>
+            <p>Fast and secure mobile payment</p>
+          </div>
+          <strong>📲</strong>
+        </div>
+
+        <div class="payment-option" onclick="selectPayment(this, 'COD')">
+          <div>
+            <h4>Cash on Delivery</h4>
+            <p>Pay upon receiving your order</p>
+          </div>
+          <strong>💵</strong>
+        </div>
+
+        <div class="payment-option" onclick="selectPayment(this, 'CARD')">
+          <div>
+            <h4>Card</h4>
+            <p>Debit or credit card payment</p>
+          </div>
+          <strong>💳</strong>
+        </div>
+      </div>
+
+      <button class="place-order-btn" onclick="placeOrder()">PLACE ORDER</button>
+    </div>
+  </div>
+
+  <div id="toastContainer" class="toast-container"></div>
+
+  <script src="dashboard.js"></script>
+</body>
+</html>

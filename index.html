@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MCP Cooperative — San Jose, Batangas</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700;800&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+</head>
+<body>
+
+  <!-- ══════════════════ NAVBAR ══════════════════ -->
+  <nav class="navbar" id="navbar">
+    <div class="navbar-inner">
+
+     <a href="index.html" class="logo">
+    <img src="img/logo.jpg" alt="MCP Logo">
+</a>
+
+      <div class="search-bar-wrap" id="searchWrap">
+        <i class="fas fa-search"></i>
+        <input type="text" id="searchInput" placeholder="Search products…" autocomplete="off">
+        <div class="search-dropdown" id="searchDropdown"></div>
+      </div>
+
+      <ul class="nav-links" id="navLinks">
+        <li><a href="#home">Home</a></li>
+        <li><a href="#shop">Shop</a></li>
+        <li><a href="#contact">Contact</a></li>
+      </ul>
+
+      <div class="nav-actions">
+        <button class="icon-btn cart-btn" id="cartBtn" title="Cart">
+          <i class="fas fa-bag-shopping"></i>
+          <span class="cart-count" id="cartCount">0</span>
+        </button>
+        <button class="btn btn-sm btn-outline" id="navLoginBtn">Log In</button>
+        <button class="btn btn-sm" id="navSignupBtn">Sign Up</button>
+        <button class="icon-btn hamburger" id="hamburger" aria-label="Menu">
+          <span></span><span></span><span></span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Mobile menu -->
+    <div class="mobile-menu" id="mobileMenu">
+      <ul>
+        <li><a href="#home">Home</a></li>
+        <li><a href="#shop">Shop</a></li>
+        <li><a href="#contact">Contact</a></li>
+      </ul>
+      <div class="mobile-search">
+        <i class="fas fa-search"></i>
+        <input type="text" id="mobileSearch" placeholder="Search products…">
+      </div>
+      <div class="mobile-auth">
+        <button class="btn btn-outline w-full" id="mobileLoginBtn">Log In</button>
+        <button class="btn w-full" id="mobileSignupBtn">Sign Up</button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- ══════════════════ HERO ══════════════════ -->
+  <section id="home" class="hero">
+    <!-- Background photo (right side, full bleed) -->
+    <div class="hero-photo"></div>
+    <div class="hero-overlay"></div>
+    <div class="hero-grain"></div>
+
+    <!-- Solid green left panel with diagonal clip -->
+    <div class="hero-left">
+      <div class="hero-inner">
+        <div class="hero-tag reveal"><i class="fas fa-seedling"></i> Est. San Jose, Batangas</div>
+        <h1 class="hero-title reveal">Your Community's<br><em>Trusted</em> Store</h1>
+        <p class="hero-sub reveal">From fresh produce to daily essentials — Shop smarter, live better.</p>
+        <div class="hero-badges reveal">
+          <div class="hbadge"><i class="fas fa-leaf"></i> Fresh Daily</div>
+          <div class="hbadge"><i class="fas fa-truck-fast"></i> Fast Delivery</div>
+          <div class="hbadge"><i class="fas fa-tags"></i> Member Savings</div>
+        </div>
+        <div class="hero-cta reveal">
+          <button class="btn btn-lg" id="heroShopBtn">Browse Products</button>
+          <button class="btn btn-lg btn-outline-white" id="heroSignupBtn">Sign Up</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════════════ SHOP ══════════════════ -->
+  <section id="shop" class="shop-section">
+    <div class="container">
+      <div class="section-label reveal">Our Products</div>
+      <h2 class="section-title reveal">Popular Items</h2>
+      <p class="section-desc reveal">Browse our best-selling items. <strong>Sign in or join</strong> to add products to your cart and place orders.</p>
+
+      <div class="filter-row reveal">
+        <button class="filter-btn active" data-cat="all">All</button>
+        <button class="filter-btn" data-cat="snacks">Snacks</button>
+        <button class="filter-btn" data-cat="beverages">Beverages</button>
+        <button class="filter-btn" data-cat="baby">Baby Care</button>
+        <button class="filter-btn" data-cat="pantry">Pantry</button>
+      </div>
+
+      <div class="product-grid" id="productGrid"></div>
+
+      <div class="no-results" id="noResults" style="display:none">
+        <i class="fas fa-search"></i>
+        <p>No products match your search.</p>
+      </div>
+
+      <div class="shop-cta reveal">
+        <p>Want to shop? Become a member or log in to your account.</p>
+        <button class="btn" id="shopSignupBtn">Join MCP Cooperative</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════════════ CONTACT ══════════════════ -->
+  <section id="contact" class="contact-section">
+    <div class="container">
+      <div class="section-label reveal">Get in Touch</div>
+      <h2 class="section-title reveal">Contact Us</h2>
+
+      <div class="contact-grid">
+        <!-- Info column -->
+        <div class="contact-info reveal">
+          <div class="info-block">
+            <div class="info-icon"><i class="fas fa-location-dot"></i></div>
+            <div>
+              <h4>Address</h4>
+              <p>Pinagtung-ulan Rd, Balagtasin,<br>San Jose, Batangas</p>
+            </div>
+          </div>
+          <div class="info-block">
+            <div class="info-icon"><i class="fas fa-phone"></i></div>
+            <div>
+              <h4>Phone / Delivery</h4>
+              <p>0963-705-3286</p>
+              <p class="info-note">Calls &amp; SMS accepted</p>
+            </div>
+          </div>
+          <div class="info-block">
+            <div class="info-icon"><i class="fas fa-envelope"></i></div>
+            <div>
+              <h4>Email</h4>
+              <p><a href="mailto:mcpcoop008@gmail.com">mcpcoop008@gmail.com</a></p>
+            </div>
+          </div>
+          <div class="info-block">
+            <div class="info-icon"><i class="fas fa-clock"></i></div>
+            <div>
+              <h4>Business Hours</h4>
+              <table class="hours-table">
+                <tr><td>Monday – Saturday</td><td>6:00 AM – 6:00 PM</td></tr>
+                <tr><td>Sunday</td><td>Closed</td></tr>
+                <tr><td>Holidays</td><td>Closed</td></tr>
+              </table>
+            </div>
+          </div>
+          <div class="info-block">
+            <div class="info-icon"><i class="fas fa-truck"></i></div>
+            <div>
+              <h4>Delivery Coverage</h4>
+              <p>Batangas area only.<br>Minimum order: ₱300</p>
+            </div>
+          </div>
+          <div class="social-row">
+            <a href="https://www.facebook.com/share/18Hvy7rACC/" target="_blank" class="social-btn fb"><i class="fab fa-facebook-f"></i> Facebook</a>
+          </div>
+        </div>
+
+        <!-- Form column -->
+        <div class="contact-form-wrap reveal">
+          <form class="contact-form" id="contactForm" novalidate>
+            <div class="form-field">
+              <label>Your Name</label>
+              <input type="text" id="contactName" placeholder="Juan dela Cruz" required>
+            </div>
+            <div class="form-field">
+              <label>Email Address</label>
+              <input type="email" id="contactEmail" placeholder="juan@email.com" required>
+            </div>
+            <div class="form-field">
+              <label>Phone (optional)</label>
+              <input type="tel" id="contactPhone" placeholder="09XX-XXX-XXXX">
+            </div>
+            <div class="form-field">
+              <label>Subject</label>
+              <select id="contactSubject">
+                <option value="">Select a topic…</option>
+                <option value="Delivery Question">Delivery Question</option>
+                <option value="Product Availability">Product Availability</option>
+                <option value="Other">Other</option>
+              </select>
+            </div>
+            <div class="form-field">
+              <label>Message</label>
+              <textarea id="contactMessage" rows="5" placeholder="How can we help you?" required></textarea>
+            </div>
+            <button type="submit" class="btn btn-full"><i class="fas fa-paper-plane"></i> Send Message</button>
+            <div class="form-msg" id="formMsg"></div>
+          </form>
+        </div>
+
+        <!-- Map -->
+        <div class="map-wrap reveal">
+          <iframe
+            src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3875.5!2d121.1068!3d13.8745!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x33bd1234567890ab%3A0xabcdef1234567890!2sSan+Jose%2C+Batangas!5e0!3m2!1sen!2sph!4v1700000000000!5m2!1sen!2sph"
+            allowfullscreen loading="lazy" referrerpolicy="no-referrer-when-downgrade">
+          </iframe>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════════════ FOOTER ══════════════════ -->
+  <footer class="footer">
+    <div class="footer-inner">
+      <p class="footer-copy">&copy; 2025 MCP Cooperative. All rights reserved.</p>
+    </div>
+  </footer>
+
+  <!-- ══════════════════ MODALS ══════════════════ -->
+
+  <!-- Sign Up Modal -->
+  <div class="modal-overlay" id="signupModal">
+    <div class="modal">
+      <button class="modal-close" id="closeSignup"><i class="fas fa-xmark"></i></button>
+      <div class="modal-header">
+        <div class="modal-icon"><i class="fas fa-user-plus"></i></div>
+        <h2>Join MCP Cooperative</h2>
+        <p>Create an account to start shopping.</p>
+      </div>
+      <form id="signupForm" novalidate>
+        <div class="form-field">
+          <label>Full Name</label>
+          <input type="text" id="suFullName" placeholder="Juan dela Cruz" required>
+        </div>
+        <div class="form-field">
+          <label>Email Address</label>
+          <input type="email" id="suEmail" placeholder="juan@email.com" required>
+        </div>
+        <div class="form-field">
+          <label>Phone Number</label>
+          <input type="tel" id="suPhone" placeholder="09XX-XXX-XXXX" required>
+        </div>
+        <div class="form-field">
+  <label>I am a:</label>
+  <select id="suRole" required>
+    <option value="customer">Customer</option>
+    <option value="employee">Employee</option>
+  </select>
+</div>
+
+<div class="form-field" id="empIdField" style="display:none">
+  <label>Employee ID</label>
+  <input type="text" id="suEmpId" placeholder="MCP-XXXX-XXX">
+  <small style="color: var(--green)">You will get an automatic discount once verified.</small>
+</div>
+        <div class="form-field">
+          <label>Password</label>
+          <div class="input-pw">
+            <input type="password" id="suPassword" placeholder="Min. 8 characters" required>
+            <button type="button" class="pw-toggle" data-target="suPassword"><i class="fas fa-eye"></i></button>
+          </div>
+        </div>
+        <div class="form-field">
+          <label>Confirm Password</label>
+          <div class="input-pw">
+            <input type="password" id="suConfirm" placeholder="Repeat password" required>
+            <button type="button" class="pw-toggle" data-target="suConfirm"><i class="fas fa-eye"></i></button>
+          </div>
+        </div>
+        <div class="form-check">
+          <input type="checkbox" id="suTerms" required>
+          <label for="suTerms">I agree to the <a href="#">Terms &amp; Conditions</a></label>
+        </div>
+        <button type="submit" class="btn btn-full">Create Account</button>
+        <div class="modal-form-msg" id="signupMsg"></div>
+      </form>
+      <p class="modal-switch">Already have an account? <button id="goLogin">Log In</button></p>
+    </div>
+  </div>
+
+  <!-- Log In Modal -->
+  <div class="modal-overlay" id="loginModal">
+    <div class="modal">
+      <button class="modal-close" id="closeLogin"><i class="fas fa-xmark"></i></button>
+      <div class="modal-header">
+        <div class="modal-icon"><i class="fas fa-right-to-bracket"></i></div>
+        <h2>Welcome Back</h2>
+        <p>Log in to your MCP account.</p>
+      </div>
+      <form id="loginForm" novalidate>
+        <div class="form-field">
+          <label>Email Address</label>
+          <input type="email" id="liEmail" placeholder="juan@email.com" required>
+        </div>
+        <div class="form-field">
+          <label>Password</label>
+          <div class="input-pw">
+            <input type="password" id="liPassword" placeholder="Your password" required>
+            <button type="button" class="pw-toggle" data-target="liPassword"><i class="fas fa-eye"></i></button>
+          </div>
+        </div>
+        <button type="submit" class="btn btn-full">Log In</button>
+        <div class="modal-form-msg" id="loginMsg"></div>
+      </form>
+      <p class="modal-switch">No account yet? <button id="goSignup">Sign Up</button></p>
+    </div>
+  </div>
+
+  <!-- Cart Sidebar -->
+  <div class="cart-overlay" id="cartOverlay"></div>
+  <aside class="cart-sidebar" id="cartSidebar">
+    <div class="cart-header">
+      <h3><i class="fas fa-bag-shopping"></i> Your Cart</h3>
+      <button id="closeCart"><i class="fas fa-xmark"></i></button>
+    </div>
+    <div class="cart-items" id="cartItems">
+      <div class="cart-empty"><i class="fas fa-basket-shopping"></i><p>Your cart is empty.</p></div>
+    </div>
+    <div class="cart-footer" id="cartFooter" style="display:none">
+      <div class="cart-total">Total: <strong id="cartTotal">₱0.00</strong></div>
+      <button class="btn btn-full" id="checkoutBtn">Checkout</button>
+    </div>
+  </aside>
+
+  <!-- Toast -->
+  <div class="toast" id="toast"></div>
+
+  <script src="script.js"></script>
+</body>
+</html>
