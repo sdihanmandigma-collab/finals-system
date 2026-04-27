@@ -1,9 +1,11 @@
 'use strict';
 
-const API_URL = 'http://localhost:5000';
+const API_URL = 'http://localhost:5055';
 
 let PRODUCTS = [];
 let ORDERS = [];
+let loginFailedAttempts = 0;
+let forgotPasswordVerified = false;
 
 const state = {
   user: null,
@@ -89,7 +91,7 @@ function closeModal(id) {
 }
 
 function closeAllModals() {
-  ['signupModal', 'loginModal'].forEach(id => {
+  ['signupModal', 'loginModal', 'forgotPasswordModal'].forEach(id => {
     const el = $(id);
     if (el) el.classList.remove('open');
   });
@@ -97,7 +99,164 @@ function closeAllModals() {
 }
 
 function anyModalOpen() {
-  return ['signupModal', 'loginModal'].some(id => $(id)?.classList.contains('open'));
+  return ['signupModal', 'loginModal', 'forgotPasswordModal'].some(id => $(id)?.classList.contains('open'));
+}
+
+// ── Forgot Password ───────────────────────────────────────────────────────────
+function openForgotPasswordModal() {
+  closeModal('loginModal');
+  openModal('forgotPasswordModal');
+
+  const loginEmail = $('liEmail')?.value.trim() || '';
+  const forgotEmail = $('forgotEmail');
+  if (forgotEmail && loginEmail) {
+    forgotEmail.value = loginEmail;
+  }
+
+  resetForgotPasswordFlow();
+}
+
+function closeForgotPasswordModal() {
+  closeModal('forgotPasswordModal');
+  resetForgotPasswordFlow();
+}
+
+function resetForgotPasswordFlow() {
+  forgotPasswordVerified = false;
+
+  if ($('forgotOtp')) $('forgotOtp').value = '';
+  if ($('forgotNewPassword')) $('forgotNewPassword').value = '';
+  if ($('forgotConfirmPassword')) $('forgotConfirmPassword').value = '';
+
+  if ($('forgotEmail')) $('forgotEmail').readOnly = false;
+
+  if ($('otpStep1')) $('otpStep1').style.display = 'block';
+  if ($('otpStep2')) $('otpStep2').style.display = 'none';
+  if ($('otpStep3')) $('otpStep3').style.display = 'none';
+
+  setMsg('forgotPasswordMsg', '', '');
+}
+
+async function sendOtp() {
+  const email = $('forgotEmail')?.value.trim();
+
+  if (!email) {
+    setMsg('forgotPasswordMsg', 'Please enter your email first.', 'error');
+    return;
+  }
+
+  try {
+    const res = await fetch(`${API_URL}/api/forgot-password/send-otp`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email })
+    });
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      throw new Error(data.message || 'Failed to send OTP');
+    }
+
+    setMsg('forgotPasswordMsg', 'OTP sent successfully. Check server terminal for demo OTP.', 'success');
+
+    if ($('forgotEmail')) $('forgotEmail').readOnly = true;
+
+    if ($('otpStep1')) $('otpStep1').style.display = 'none';
+    if ($('otpStep2')) $('otpStep2').style.display = 'block';
+    if ($('otpStep3')) $('otpStep3').style.display = 'none';
+  } catch (error) {
+    console.error('Send OTP error:', error);
+    setMsg('forgotPasswordMsg', error.message || 'Failed to send OTP.', 'error');
+  }
+}
+
+async function verifyOtp() {
+  const email = $('forgotEmail')?.value.trim();
+  const otp = $('forgotOtp')?.value.trim();
+
+  if (!email || !otp) {
+    setMsg('forgotPasswordMsg', 'Please enter your email and OTP.', 'error');
+    return;
+  }
+
+  try {
+    const res = await fetch(`${API_URL}/api/forgot-password/verify-otp`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, otp })
+    });
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      throw new Error(data.message || 'Invalid OTP');
+    }
+
+    forgotPasswordVerified = true;
+    setMsg('forgotPasswordMsg', 'OTP verified. You may now reset your password.', 'success');
+
+    if ($('otpStep2')) $('otpStep2').style.display = 'none';
+    if ($('otpStep3')) $('otpStep3').style.display = 'block';
+  } catch (error) {
+    console.error('Verify OTP error:', error);
+    setMsg('forgotPasswordMsg', error.message || 'OTP verification failed.', 'error');
+  }
+}
+
+async function resetForgotPassword(e) {
+  e.preventDefault();
+
+  const email = $('forgotEmail')?.value.trim();
+  const newPassword = $('forgotNewPassword')?.value;
+  const confirmPassword = $('forgotConfirmPassword')?.value;
+
+  if (!forgotPasswordVerified) {
+    setMsg('forgotPasswordMsg', 'Please verify OTP first.', 'error');
+    return;
+  }
+
+  if (!newPassword || !confirmPassword) {
+    setMsg('forgotPasswordMsg', 'Please enter and confirm your new password.', 'error');
+    return;
+  }
+
+  if (newPassword.length < 8) {
+    setMsg('forgotPasswordMsg', 'Password must be at least 8 characters.', 'error');
+    return;
+  }
+
+  if (newPassword !== confirmPassword) {
+    setMsg('forgotPasswordMsg', 'Passwords do not match.', 'error');
+    return;
+  }
+
+  try {
+    const res = await fetch(`${API_URL}/api/forgot-password/reset`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, newPassword })
+    });
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      throw new Error(data.message || 'Failed to reset password');
+    }
+
+    setMsg('forgotPasswordMsg', 'Password reset successfully.', 'success');
+
+    setTimeout(() => {
+      closeForgotPasswordModal();
+      openModal('loginModal');
+
+      if ($('liEmail')) $('liEmail').value = email;
+      setMsg('loginMsg', 'You may now log in with your new password.', 'success');
+    }, 1200);
+  } catch (error) {
+    console.error('Reset password error:', error);
+    setMsg('forgotPasswordMsg', error.message || 'Failed to reset password.', 'error');
+  }
 }
 
 // ── Auth / User ───────────────────────────────────────────────────────────────
@@ -120,7 +279,12 @@ function logout() {
 
 function updateUIForLoggedInUser() {
   if (!state.user) return;
-  window.location.href = 'dashboard.html';
+
+  if (state.user.role === 'admin') {
+    window.location.href = 'admin-orders.html';
+  } else {
+    window.location.href = 'dashboard.html';
+  }
 }
 
 // ── Products ──────────────────────────────────────────────────────────────────
@@ -128,9 +292,9 @@ async function init() {
   observeReveal();
 
   try {
-    console.log('Fetching products from:', `${API_URL}/api/products`);
+    console.log('Fetching products from:', `${API_URL}/api/products/popular`);
 
-    const response = await fetch(`${API_URL}/api/products`);
+    const response = await fetch(`${API_URL}/api/products/popular`);
 
     console.log('Products response status:', response.status);
 
@@ -142,7 +306,6 @@ async function init() {
     console.log('Loaded products:', PRODUCTS);
 
     renderProducts();
-    renderSales(PRODUCTS);
 
     const mo = new MutationObserver(() => observeReveal());
     mo.observe(document.body, { childList: true, subtree: true });
@@ -160,7 +323,8 @@ function isEmployee() {
 }
 
 function getDiscountedPrice(price) {
-  return isEmployee() ? Number(price) * 0.90 : Number(price);
+  const amount = Number(price) || 0;
+  return isEmployee() ? Number((amount * 0.90).toFixed(2)) : amount;
 }
 
 function getFilteredProducts() {
@@ -200,31 +364,57 @@ function renderProducts() {
   grid.innerHTML = filtered.map((p, i) => {
     const original = Number(p.price);
     const finalPrice = getDiscountedPrice(original);
+    const hasDiscount = isEmployee() && finalPrice < original;
+    const stock = Number(p.stock ?? 100);
+    const categoryLabel = CATEGORY_LABELS[String(p.category).toLowerCase()] || p.category;
 
     return `
-      <div class="product-card reveal" style="transition-delay:${i * 60}ms">
-        <div class="product-img-wrap">
-          ${p.badge ? `<span class="product-badge">${p.badge}</span>` : ''}
-          ${p.image
-            ? `<img src="${p.image}" alt="${p.name}" onerror="this.style.display='none'">`
-            : `<div class="product-img-placeholder"><i class="fas fa-box-open"></i></div>`
+      <div class="product-card premium-card reveal" style="transition-delay:${i * 60}ms">
+        <div class="product-card-top">
+          <span class="product-category-badge">${categoryLabel}</span>
+          ${hasDiscount ? `<span class="discount-badge">10% OFF</span>` : ``}
+        </div>
+
+        <div class="product-image premium-image">
+          ${
+            p.image
+              ? `<img src="${p.image}" alt="${p.name}" onerror="this.style.display='none'; this.parentElement.innerHTML='<div class=&quot;product-placeholder&quot;>📦</div>';">`
+              : `<div class="product-placeholder">📦</div>`
           }
         </div>
-        <div class="product-card-body">
-          <p class="product-category">${CATEGORY_LABELS[String(p.category).toLowerCase()] || p.category}</p>
-          <h3>${p.name}</h3>
-          <p class="product-price">
+
+        <div class="product-info">
+          <h3 class="product-name premium-name">${p.name}</h3>
+
+          <div class="product-stock ${stock > 0 ? 'in-stock' : 'out-stock'}">
+            ${stock > 0 ? `In Stock • ${stock} available` : `Out of Stock`}
+          </div>
+
+          <div class="product-price premium-price">
             ${
-              isEmployee()
-                ? `<span style="text-decoration:line-through; color:#999; margin-right:8px;">${fmt(original)}</span>
-                   <span style="color:var(--green-dark); font-weight:700;">${fmt(finalPrice)}</span>`
-                : `${fmt(original)}`
+              hasDiscount
+                ? `
+                  <span class="old-price">${fmt(original)}</span>
+                  <span class="new-price">${fmt(finalPrice)}</span>
+                `
+                : `<span class="normal-price">${fmt(original)}</span>`
             }
-          </p>
+          </div>
+
           ${
             isLoggedIn
-              ? `<button class="add-cart-btn" onclick="addToCart(${p.id})"><i class="fas fa-cart-plus"></i> Add to Cart</button>`
-              : `<button class="add-cart-btn locked" onclick="openModal('loginModal')"><i class="fas fa-lock"></i> Sign in to Order</button>`
+              ? `
+                <button class="order-btn premium-btn" onclick="addToCart(${p.id})" ${stock <= 0 ? 'disabled' : ''}>
+                  <i class="fas fa-cart-plus"></i>
+                  Add to Cart
+                </button>
+              `
+              : `
+                <button class="order-btn premium-btn" onclick="openModal('signupModal')">
+                  <i class="fas fa-lock"></i>
+                  Sign in to Order
+                </button>
+              `
           }
         </div>
       </div>
@@ -237,29 +427,6 @@ function renderProducts() {
       el.classList.add('visible');
     });
   });
-}
-
-function renderSales(products) {
-  const track = document.getElementById('salesTrack');
-  if (!track) return;
-
-  const salesProducts = products.slice(0, 5);
-
-  track.innerHTML = salesProducts.map(p => `
-    <div class="sale-card">
-      <div class="sale-image-wrap">
-        ${p.image
-          ? `<img src="${p.image}" alt="${p.name}" onerror="this.style.display='none'">`
-          : `<div class="product-img-placeholder"><i class="fas fa-box-open"></i></div>`
-        }
-      </div>
-      <div class="sale-content">
-        <span class="sale-badge">Hot Sale</span>
-        <div class="sale-title">${p.name}</div>
-        <div class="sale-price">${fmt(p.price)}</div>
-      </div>
-    </div>
-  `).join('');
 }
 
 // ── Orders ────────────────────────────────────────────────────────────────────
@@ -382,26 +549,56 @@ function updateCartUI() {
     return;
   }
 
-  itemsEl.innerHTML = state.cart.map(ci => `
-    <div class="cart-item">
-      ${ci.product.image
-        ? `<img src="${ci.product.image}" alt="${ci.product.name}" onerror="this.style.display='none'">`
-        : `<div style="width:52px;height:52px;border-radius:8px;background:var(--green-pale);display:flex;align-items:center;justify-content:center;color:var(--green);font-size:1.2rem;flex-shrink:0"><i class="fas fa-box"></i></div>`
-      }
-      <div class="ci-info">
-        <div class="ci-name">${ci.product.name}</div>
-        <div class="ci-price">${fmt(Number(ci.product.price) * ci.qty)}</div>
-        <div class="ci-qty">
-          <button onclick="changeQty(${ci.product.id}, -1)"><i class="fas fa-minus"></i></button>
-          <span>${ci.qty}</span>
-          <button onclick="changeQty(${ci.product.id}, 1)"><i class="fas fa-plus"></i></button>
+  itemsEl.innerHTML = state.cart.map(ci => {
+    const originalPrice = Number(ci.product.originalPrice ?? ci.product.price);
+    const discountedPrice = Number(ci.product.price);
+    const lineTotal = discountedPrice * ci.qty;
+    const hasDiscount = originalPrice > discountedPrice;
+
+    return `
+      <div class="cart-item">
+        ${ci.product.image
+          ? `<img src="${ci.product.image}" alt="${ci.product.name}" onerror="this.style.display='none'">`
+          : `<div style="width:52px;height:52px;border-radius:8px;background:var(--green-pale);display:flex;align-items:center;justify-content:center;color:var(--green);font-size:1.2rem;flex-shrink:0"><i class="fas fa-box"></i></div>`
+        }
+        <div class="ci-info">
+          <div class="ci-name">${ci.product.name}</div>
+
+          <div class="ci-price">
+            ${
+              hasDiscount
+                ? `
+                  <div style="text-decoration:line-through; color:#999; font-size:.9rem;">
+                    ${fmt(originalPrice)}
+                  </div>
+                  <div style="color:var(--green-dark); font-weight:700;">
+                    ${fmt(discountedPrice)}
+                  </div>
+                  <div style="font-size:.85rem; color:#666;">
+                    Qty: ${ci.qty} • Total: ${fmt(lineTotal)}
+                  </div>
+                `
+                : `
+                  <div>${fmt(discountedPrice)}</div>
+                  <div style="font-size:.85rem; color:#666;">
+                    Qty: ${ci.qty} • Total: ${fmt(lineTotal)}
+                  </div>
+                `
+            }
+          </div>
+
+          <div class="ci-qty">
+            <button onclick="changeQty(${ci.product.id}, -1)"><i class="fas fa-minus"></i></button>
+            <span>${ci.qty}</span>
+            <button onclick="changeQty(${ci.product.id}, 1)"><i class="fas fa-plus"></i></button>
+          </div>
         </div>
+        <button class="ci-remove" onclick="removeFromCart(${ci.product.id})" title="Remove">
+          <i class="fas fa-trash-can"></i>
+        </button>
       </div>
-      <button class="ci-remove" onclick="removeFromCart(${ci.product.id})" title="Remove">
-        <i class="fas fa-trash-can"></i>
-      </button>
-    </div>
-  `).join('');
+    `;
+  }).join('');
 
   if (footerEl) footerEl.style.display = 'block';
   if (totalEl) totalEl.textContent = fmt(total);
@@ -435,7 +632,7 @@ async function placeOrder() {
         userId: state.user.id,
         order_code: newOrderId,
         order_date: today,
-        status: 'Pending',
+        status: 'Processing',
         items: totalItems,
         subtotal: subtotal,
         vat: vat,
@@ -569,13 +766,39 @@ document.addEventListener('DOMContentLoaded', () => {
     updateCartUI();
   }
 
+  const suEmpId = $('suEmpId');
+  if (suEmpId) {
+    suEmpId.addEventListener('input', () => {
+      let value = suEmpId.value.toUpperCase();
+      value = value.replace(/[^A-Z0-9]/g, '');
+
+      if (!value.startsWith('MCP')) {
+        value = 'MCP' + value.replace(/^MCP?/, '');
+      }
+
+      let raw = value.slice(3).replace(/[^0-9]/g, '').slice(0, 6);
+
+      let formatted = 'MCP';
+
+      if (raw.length > 0) {
+        formatted += '-' + raw.slice(0, 4);
+      }
+
+      if (raw.length > 4) {
+        formatted += '-' + raw.slice(4, 6);
+      }
+
+      suEmpId.value = formatted;
+    });
+  }
+
   init();
 
-  ['signupModal', 'loginModal'].forEach(id => {
+  ['signupModal', 'loginModal', 'forgotPasswordModal'].forEach(id => {
     const el = $(id);
     if (el) {
       el.addEventListener('click', e => {
-        if (e.target === el) closeAllModals();
+        if (e.target === el) closeModal(id);
       });
     }
   });
@@ -619,7 +842,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const fullname = $('suFullName')?.value.trim();
     const email = $('suEmail')?.value.trim();
     const role = $('suRole')?.value;
-    const employee_id = $('suEmpId')?.value.trim();
+    const employee_id = $('suEmpId')?.value.trim().toUpperCase();
     const password = $('suPassword')?.value;
     const confirmPassword = $('suConfirm')?.value;
     const termsAccepted = $('suTerms')?.checked;
@@ -649,9 +872,18 @@ document.addEventListener('DOMContentLoaded', () => {
       return;
     }
 
-    if (role === 'employee' && !employee_id) {
-      setMsg('signupMsg', 'Employee ID is required.', 'error');
-      return;
+    if (role === 'employee') {
+      if (!employee_id) {
+        setMsg('signupMsg', 'Employee ID is required.', 'error');
+        return;
+      }
+
+      const empIdPattern = /^MCP-\d{4}-\d{2}$/;
+
+      if (!empIdPattern.test(employee_id)) {
+        setMsg('signupMsg', 'Employee ID must follow the format MCP-YYYY-XX.', 'error');
+        return;
+      }
     }
 
     try {
@@ -712,31 +944,55 @@ document.addEventListener('DOMContentLoaded', () => {
       const data = await response.json();
 
       if (!response.ok) {
+        loginFailedAttempts++;
+
         setMsg('loginMsg', data.message || 'Login failed.', 'error');
+
+        const forgotTrigger = $('forgotPasswordTrigger');
+        if (forgotTrigger && loginFailedAttempts >= 2) {
+          forgotTrigger.style.display = 'block';
+        }
+
         return;
       }
 
+      loginFailedAttempts = 0;
+      const forgotTrigger = $('forgotPasswordTrigger');
+      if (forgotTrigger) forgotTrigger.style.display = 'none';
+
       state.user = data.user;
-      localStorage.setItem('user', JSON.stringify(state.user));
+localStorage.setItem('user', JSON.stringify(state.user));
 
-      loadCartFromStorage();
-      await loadOrders();
+console.log('Logged in user:', data.user);
+console.log('Redirect role:', state.user.role);
 
-      setMsg('loginMsg', data.message || 'Login successful!', 'success');
-      showToast(`Welcome, ${state.user.fullname}!`, 'success');
+loadCartFromStorage();
+await loadOrders();
 
-      $('loginForm').reset();
-      closeAllModals();
+setMsg('loginMsg', data.message || 'Login successful!', 'success');
+showToast(`Welcome, ${state.user.fullname}!`, 'success');
 
-      setTimeout(() => {
-        window.location.href = 'dashboard.html';
-      }, 300);
+$('loginForm').reset();
+closeAllModals();
+
+setTimeout(() => {
+  if (state.user.role === 'admin') {
+    window.location.href = 'admin-orders.html';
+  } else {
+    window.location.href = 'dashboard.html';
+  }
+}, 300);
 
     } catch (error) {
       console.error('Login error:', error);
       setMsg('loginMsg', 'Server error during login.', 'error');
     }
   });
+
+  // Forgot Password Form
+  $('sendOtpBtn')?.addEventListener('click', sendOtp);
+$('verifyOtpBtn')?.addEventListener('click', verifyOtp);
+$('forgotPasswordForm')?.addEventListener('submit', resetForgotPassword);
 
   // Password toggles
   document.querySelectorAll('.pw-toggle').forEach(btn => {
@@ -891,3 +1147,5 @@ window.changeQty = changeQty;
 window.removeFromCart = removeFromCart;
 window.openModal = openModal;
 window.logout = logout;
+window.openForgotPasswordModal = openForgotPasswordModal;
+window.closeForgotPasswordModal = closeForgotPasswordModal;

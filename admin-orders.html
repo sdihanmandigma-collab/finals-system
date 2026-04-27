@@ -1,0 +1,1023 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin Management</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Playfair+Display:wght@700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <link rel="stylesheet" href="admin.css">
+</head>
+<body>
+  <!-- HEADER / NAVBAR -->
+<nav class="navbar" id="navbar">
+  <div class="navbar-inner">
+    <a href="index.html" class="logo">
+      <img src="img/logo.jpg" alt="MCP Logo">
+    </a>
+
+    <div class="admin-nav-title">
+      <div class="admin-nav-label">MCP Cooperative</div>
+      <div class="admin-nav-sub">Admin Management Panel</div>
+    </div>
+
+    <ul class="nav-links admin-nav-links">
+  <li><a href="#" onclick="switchTab('orders'); return false;">Orders</a></li>
+  <li><a href="#" onclick="switchTab('users'); return false;">Users</a></li>
+  <li><a href="#" onclick="switchTab('products'); return false;">Products</a></li>
+</ul>
+
+    <div class="nav-actions">
+      <button class="btn btn-sm" type="button" onclick="openLogoutModal()">Log Out</button>
+    </div>
+  </div>
+</nav>
+
+  <!-- MAIN -->
+  <div class="container admin-shell">
+    <div class="admin-header">
+      <div class="admin-title">
+        <h1>Admin Management</h1>
+        <p>Review orders, update statuses, verify GCash payments, and approve user accounts with automatic notifications.</p>
+      </div>
+    </div>
+
+    <div class="panel">
+
+      <div id="ordersTab">
+        <div class="toolbar">
+          <input
+            type="text"
+            id="searchInput"
+            placeholder="Search by order code, customer name, email, address..."
+          />
+          <select id="statusFilter">
+            <option value="all">All Statuses</option>
+            <option value="Processing">Processing</option>
+            <option value="Packed">Packed</option>
+            <option value="Out for Delivery">Out for Delivery</option>
+            <option value="Delivered">Delivered</option>
+            <option value="Cancelled">Cancelled</option>
+          </select>
+          <button class="btn secondary" onclick="loadAdminOrders()">Refresh Orders</button>
+        </div>
+
+        <div id="ordersContainer" class="list-wrap">
+          <div class="empty">Loading orders...</div>
+        </div>
+      </div>
+
+      <div id="usersTab" class="hidden">
+        <div class="toolbar">
+          <input
+            type="text"
+            id="userSearchInput"
+            placeholder="Search by full name, email, role, employee ID..."
+          />
+          <select id="userStatusFilter">
+            <option value="all">All User Statuses</option>
+            <option value="pending">Pending</option>
+            <option value="verified">Verified</option>
+          </select>
+          <button class="btn secondary" onclick="loadAdminUsers()">Refresh Users</button>
+        </div>
+
+        <div id="usersContainer" class="list-wrap">
+          <div class="empty">Loading users...</div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div id="productsTab" class="hidden">
+  <div class="toolbar">
+    <input
+      type="text"
+      id="productSearchInput"
+      placeholder="Search by product name, category, image, or description..."
+    />
+    <select id="productCategoryFilter">
+      <option value="all">All Categories</option>
+      <option value="Pantry">Pantry</option>
+      <option value="Essentials">Essentials</option>
+      <option value="Beverages">Beverages</option>
+      <option value="Snacks">Snacks</option>
+      <option value="Staples">Staples</option>
+      <option value="Dairy">Dairy</option>
+    </select>
+    <button class="btn secondary" onclick="loadAdminProducts()">Refresh Products</button>
+  </div>
+
+  <div id="productsContainer" class="list-wrap">
+    <div class="empty">Loading products...</div>
+  </div>
+</div>
+
+  <!-- FOOTER -->
+  <footer class="footer">
+    <div class="footer-inner">
+      <p class="footer-copy">&copy; 2025 MCP Cooperative. All rights reserved.</p>
+    </div>
+  </footer>
+
+  <!-- ACTION MODAL -->
+  <div class="modal-overlay" id="actionModal">
+    <div class="modal admin-modal">
+      <button class="modal-close" type="button" onclick="closeActionModal()">
+        <i class="fas fa-xmark"></i>
+      </button>
+
+      <div class="modal-header">
+        <div class="modal-icon"><i class="fas fa-shield-check"></i></div>
+        <h2 id="actionModalTitle">Confirm Action</h2>
+        <p id="actionModalText">Are you sure you want to continue?</p>
+      </div>
+
+      <div class="admin-modal-body">
+        <div class="admin-modal-summary" id="actionModalSummary"></div>
+
+        <div class="admin-modal-actions">
+          <button class="btn btn-outline action-cancel-btn" type="button" onclick="closeActionModal()">Cancel</button>
+          <button class="btn" type="button" id="actionModalConfirmBtn">Confirm</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-overlay" id="logoutModal">
+  <div class="modal simple-logout-modal">
+    <button class="modal-close" type="button" onclick="closeLogoutModal()">×</button>
+
+    <div class="modal-header" style="text-align:left; margin-bottom:10px;">
+      <h2 class="simple-logout-title">Log Out</h2>
+      <p>Are you sure you want to log out?</p>
+    </div>
+
+    <div class="simple-logout-actions">
+      <button class="btn btn-outline simple-cancel-btn" type="button" onclick="closeLogoutModal()">Cancel</button>
+      <button class="btn simple-logout-btn" type="button" onclick="confirmLogoutAdmin()">Log Out</button>
+    </div>
+  </div>
+</div>
+
+  <script>
+
+  const API_URL = 'http://localhost:5055';
+let adminUser = JSON.parse(localStorage.getItem('user') || 'null');
+let ALL_ORDERS = [];
+let ALL_USERS = [];
+let ALL_PRODUCTS = [];
+let pendingAction = null;
+
+if (!adminUser) {
+  alert('Please login first.');
+  window.location.href = 'index.html';
+} else if (adminUser.role !== 'admin') {
+  alert('Access denied. Admin only.');
+  window.location.href = 'dashboard.html';
+}
+
+    function fmt(n) {
+      return '₱' + Number(n || 0).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+    }
+
+    function escapeHtml(value) {
+      return String(value ?? '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+    }
+
+    function getStatusClass(status) {
+      return String(status || '').toLowerCase().replace(/\s+/g, '-');
+    }
+
+    function getPaymentClass(status) {
+      return 'payment-' + String(status || '').toLowerCase().replace(/\s+/g, '-');
+    }
+
+    function getUserStatusClass(status) {
+      return 'user-' + String(status || '').toLowerCase();
+    }
+
+    function switchTab(tab) {
+  const ordersTab = document.getElementById('ordersTab');
+  const usersTab = document.getElementById('usersTab');
+  const productsTab = document.getElementById('productsTab');
+
+  if (ordersTab) ordersTab.classList.toggle('hidden', tab !== 'orders');
+  if (usersTab) usersTab.classList.toggle('hidden', tab !== 'users');
+  if (productsTab) productsTab.classList.toggle('hidden', tab !== 'products');
+}
+
+    function toggleCard(id) {
+      const card = document.getElementById(id);
+      if (card) card.classList.toggle('open');
+    }
+
+    function openActionModal({ title, text, summaryHtml = '', onConfirm }) {
+      const modal = document.getElementById('actionModal');
+      const titleEl = document.getElementById('actionModalTitle');
+      const textEl = document.getElementById('actionModalText');
+      const summaryEl = document.getElementById('actionModalSummary');
+      const confirmBtn = document.getElementById('actionModalConfirmBtn');
+
+      titleEl.textContent = title || 'Confirm Action';
+      textEl.textContent = text || 'Are you sure you want to continue?';
+      summaryEl.innerHTML = summaryHtml || '';
+      pendingAction = onConfirm || null;
+
+      confirmBtn.onclick = async () => {
+        if (typeof pendingAction === 'function') {
+          await pendingAction();
+        }
+      };
+
+      modal.classList.add('open');
+      document.body.style.overflow = 'hidden';
+    }
+
+    function closeActionModal() {
+      const modal = document.getElementById('actionModal');
+      modal.classList.remove('open');
+      document.body.style.overflow = '';
+      pendingAction = null;
+    }
+
+    async function loadAdminOrders() {
+      const container = document.getElementById('ordersContainer');
+      container.innerHTML = '<div class="empty">Loading orders...</div>';
+
+      try {
+        const res = await fetch(`${API_URL}/api/admin/orders?adminId=${adminUser.id}`);
+        const orders = await res.json();
+
+        if (!res.ok) throw new Error(orders.message || 'Failed to load orders');
+
+        ALL_ORDERS = Array.isArray(orders) ? orders : [];
+        renderOrders();
+      } catch (error) {
+        console.error(error);
+        container.innerHTML = `<div class="empty">${escapeHtml(error.message || 'Failed to load orders.')}</div>`;
+      }
+    }
+
+    function renderOrders() {
+      const container = document.getElementById('ordersContainer');
+      const search = (document.getElementById('searchInput').value || '').trim().toLowerCase();
+      const statusFilter = document.getElementById('statusFilter').value;
+
+      let filtered = [...ALL_ORDERS];
+
+      if (statusFilter !== 'all') {
+        filtered = filtered.filter(order => String(order.status) === statusFilter);
+      }
+
+      if (search) {
+        filtered = filtered.filter(order => {
+          const haystack = [
+            order.order_code,
+            order.fullname,
+            order.email,
+            order.address,
+            order.payment_method,
+            order.payment_status
+          ].map(v => String(v || '').toLowerCase()).join(' ');
+
+          return haystack.includes(search);
+        });
+      }
+
+      if (!filtered.length) {
+        container.innerHTML = '<div class="empty">No matching orders found.</div>';
+        return;
+      }
+
+      container.innerHTML = filtered.map(order => `
+        <div class="admin-card" id="card-${order.id}">
+          <div class="card-head" onclick="toggleCard('card-${order.id}')">
+            <div class="head-block">
+              <div class="label">Order Code</div>
+              <div class="value">${escapeHtml(order.order_code)}</div>
+            </div>
+            <div class="head-block">
+              <div class="label">Customer</div>
+              <div class="value">${escapeHtml(order.fullname || 'N/A')}</div>
+            </div>
+            <div class="head-block">
+              <div class="label">Status</div>
+              <div class="value">
+                <span class="status-badge ${getStatusClass(order.status)}">${escapeHtml(order.status || 'N/A')}</span>
+              </div>
+            </div>
+            <div class="head-block">
+              <div class="label">Payment</div>
+              <div class="value">${escapeHtml(order.payment_method || 'N/A')}</div>
+            </div>
+            <div class="head-block">
+              <div class="label">Payment Status</div>
+              <div class="value">
+                <span class="payment-badge ${getPaymentClass(order.payment_status)}">${escapeHtml(order.payment_status || 'N/A')}</span>
+              </div>
+            </div>
+            <div class="head-block">
+              <div class="label">Total</div>
+              <div class="value">${fmt(order.total)}</div>
+            </div>
+            <div class="card-toggle">
+              <button class="toggle-btn" type="button" onclick="event.stopPropagation(); toggleCard('card-${order.id}')">+</button>
+            </div>
+          </div>
+
+          <div class="card-body">
+            <div class="details-grid">
+              <div class="detail-box"><div class="label">Email</div><div class="value">${escapeHtml(order.email || 'N/A')}</div></div>
+              <div class="detail-box"><div class="label">Order Date</div><div class="value">${escapeHtml(order.order_date || 'N/A')}</div></div>
+              <div class="detail-box"><div class="label">Items</div><div class="value">${Number(order.items || 0)}</div></div>
+              <div class="detail-box"><div class="label">Reference Number</div><div class="value">${escapeHtml(order.reference_number || 'N/A')}</div></div>
+              <div class="detail-box"><div class="label">GCash Sender</div><div class="value">${escapeHtml(order.sender_name || 'N/A')}</div></div>
+              <div class="detail-box"><div class="label">Estimated Delivery</div><div class="value">${escapeHtml(order.estimated_delivery || 'N/A')}</div></div>
+              <div class="detail-box"><div class="label">Subtotal</div><div class="value">${fmt(order.subtotal)}</div></div>
+              <div class="detail-box"><div class="label">VAT</div><div class="value">${fmt(order.vat)}</div></div>
+              <div class="detail-box"><div class="label">Shipping Fee</div><div class="value">${fmt(order.shipping_fee)}</div></div>
+              <div class="detail-box"><div class="label">Promo Discount</div><div class="value">${fmt(order.promo_discount)}</div></div>
+              <div class="detail-box full-span">
+                <div class="label">Address</div>
+                <div class="value">${escapeHtml(order.address || 'N/A')}</div>
+              </div>
+            </div>
+
+            <div class="section-title">Order Items</div>
+            <div class="order-items" id="items-${order.id}">
+              <div class="muted">Loading items...</div>
+            </div>
+
+            <div class="section-title">Update Order</div>
+            <div class="action-box">
+              <div class="action-grid">
+                <div>
+                  <div class="muted action-label">Select new status</div>
+                  <select class="action-select" id="status-${order.id}">
+                    <option value="">Select status</option>
+                    <option value="Processing">Processing</option>
+                    <option value="Packed">Packed</option>
+                    <option value="Out for Delivery">Out for Delivery</option>
+                    <option value="Delivered">Delivered</option>
+                    <option value="Cancelled">Cancelled</option>
+                  </select>
+                </div>
+                <div>
+                  <div class="muted action-label">Admin notes</div>
+                  <textarea class="action-notes" id="notes-${order.id}" placeholder="Add optional notes for this update..."></textarea>
+                </div>
+              </div>
+
+              <div class="actions">
+                <button class="btn" onclick="prepareUpdateOrderStatus(${order.id})">Save Update</button>
+                <button class="btn secondary" onclick="reloadSingleOrder(${order.id})">Refresh History</button>
+                <button class="btn secondary" onclick="reloadOrderItems(${order.id})">Refresh Items</button>
+                ${
+                  order.payment_method === 'GCash' && order.payment_status === 'Pending Verification'
+                    ? `<button class="btn secondary" onclick="prepareVerifyGcash(${order.id})">Verify GCash</button>`
+                    : ''
+                }
+              </div>
+
+              <div id="loading-${order.id}" class="loading-inline"></div>
+            </div>
+
+            <div class="section-title">Status History</div>
+            <div class="history" id="history-${order.id}">
+              <div class="muted">Loading history...</div>
+            </div>
+          </div>
+        </div>
+      `).join('');
+
+      filtered.forEach(order => {
+        const statusEl = document.getElementById(`status-${order.id}`);
+        if (statusEl) statusEl.value = order.status || '';
+        loadOrderHistoryInto(order.id);
+        loadOrderItemsInto(order.id);
+      });
+    }
+
+    async function loadOrderHistory(orderId) {
+      try {
+        const res = await fetch(`${API_URL}/api/order-status-history/${orderId}`);
+        const history = await res.json();
+        return Array.isArray(history) ? history : [];
+      } catch {
+        return [];
+      }
+    }
+
+    function renderHistory(history) {
+      if (!history.length) return '<div class="muted">No history yet.</div>';
+
+      return history.map(item => `
+        <div class="history-item">
+          <div>
+            <div><strong>${escapeHtml(item.status || '')}</strong></div>
+            <div class="muted">${escapeHtml(item.notes || '')}</div>
+          </div>
+          <div class="muted">${escapeHtml(item.created_at || '')}</div>
+        </div>
+      `).join('');
+    }
+
+    async function loadOrderHistoryInto(orderId) {
+      const container = document.getElementById(`history-${orderId}`);
+      if (!container) return;
+      container.innerHTML = '<div class="muted">Loading history...</div>';
+      const history = await loadOrderHistory(orderId);
+      container.innerHTML = renderHistory(history);
+    }
+
+    async function loadOrderItems(orderId) {
+      try {
+        const res = await fetch(`${API_URL}/api/order-items/${orderId}`);
+        const items = await res.json();
+        return Array.isArray(items) ? items : [];
+      } catch {
+        return [];
+      }
+    }
+
+    function renderItems(items) {
+      if (!items.length) return '<div class="muted">No order items found.</div>';
+
+      return items.map(item => `
+        <div class="item-row">
+          <div>
+            <div class="item-name">${escapeHtml(item.product_name || 'Unnamed Product')}</div>
+            <div class="muted">Qty: ${Number(item.qty || 0)}</div>
+          </div>
+          <div>
+            <div>${fmt(item.price)} each</div>
+            <div class="muted">Line Total: ${fmt((Number(item.qty || 0) * Number(item.price || 0)))}</div>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    async function loadOrderItemsInto(orderId) {
+      const container = document.getElementById(`items-${orderId}`);
+      if (!container) return;
+      container.innerHTML = '<div class="muted">Loading items...</div>';
+      const items = await loadOrderItems(orderId);
+      container.innerHTML = renderItems(items);
+    }
+
+    function prepareUpdateOrderStatus(orderId) {
+      const order = ALL_ORDERS.find(o => Number(o.id) === Number(orderId));
+      const statusEl = document.getElementById(`status-${orderId}`);
+      const notesEl = document.getElementById(`notes-${orderId}`);
+
+      if (!statusEl || !statusEl.value) {
+        alert('Please select a status.');
+        return;
+      }
+
+      const nextStatus = statusEl.value;
+      const notes = notesEl ? notesEl.value.trim() : '';
+
+      openActionModal({
+        title: 'Update Order Status',
+        text: 'Please confirm this order update.',
+        summaryHtml: `
+          <div class="modal-summary-grid">
+            <div><strong>Order:</strong> ${escapeHtml(order?.order_code || orderId)}</div>
+            <div><strong>Customer:</strong> ${escapeHtml(order?.fullname || 'N/A')}</div>
+            <div><strong>Current Status:</strong> ${escapeHtml(order?.status || 'N/A')}</div>
+            <div><strong>New Status:</strong> ${escapeHtml(nextStatus)}</div>
+            <div class="full-width"><strong>Notes:</strong> ${escapeHtml(notes || 'No notes provided')}</div>
+          </div>
+        `,
+        onConfirm: async () => {
+          await updateOrderStatus(orderId);
+          closeActionModal();
+        }
+      });
+    }
+
+    async function updateOrderStatus(orderId) {
+      const loadingEl = document.getElementById(`loading-${orderId}`);
+      const statusEl = document.getElementById(`status-${orderId}`);
+      const notesEl = document.getElementById(`notes-${orderId}`);
+
+      try {
+        const status = statusEl.value;
+        const notes = notesEl.value.trim();
+
+        if (loadingEl) loadingEl.textContent = 'Updating order status...';
+
+        const res = await fetch(`${API_URL}/api/orders/${orderId}/status`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            status,
+            notes,
+            changed_by: adminUser.id
+          })
+        });
+
+        const data = await res.json();
+
+        if (!res.ok) throw new Error(data.message || 'Failed to update order status');
+
+        if (loadingEl) loadingEl.textContent = 'Order updated successfully. Refreshing data...';
+        await loadAdminOrders();
+      } catch (error) {
+        console.error(error);
+        if (loadingEl) loadingEl.textContent = '';
+        alert(error.message || 'Failed to update order.');
+      }
+    }
+
+    function prepareVerifyGcash(orderId) {
+      const order = ALL_ORDERS.find(o => Number(o.id) === Number(orderId));
+
+      openActionModal({
+        title: 'Verify GCash Payment',
+        text: 'Please confirm GCash verification for this order.',
+        summaryHtml: `
+          <div class="modal-summary-grid">
+            <div><strong>Order:</strong> ${escapeHtml(order?.order_code || orderId)}</div>
+            <div><strong>Customer:</strong> ${escapeHtml(order?.fullname || 'N/A')}</div>
+            <div><strong>Reference:</strong> ${escapeHtml(order?.reference_number || 'N/A')}</div>
+            <div><strong>Sender:</strong> ${escapeHtml(order?.sender_name || 'N/A')}</div>
+          </div>
+        `,
+        onConfirm: async () => {
+          await verifyGcashPayment(orderId);
+          closeActionModal();
+        }
+      });
+    }
+
+    async function verifyGcashPayment(orderId) {
+      const loadingEl = document.getElementById(`loading-${orderId}`);
+
+      try {
+        if (loadingEl) loadingEl.textContent = 'Verifying GCash payment...';
+
+        const res = await fetch(`${API_URL}/api/payments/${orderId}/verify-gcash`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ adminId: adminUser.id })
+        });
+
+        const data = await res.json();
+
+        if (!res.ok) throw new Error(data.message || 'Failed to verify GCash payment');
+
+        if (loadingEl) loadingEl.textContent = 'GCash payment verified successfully. Refreshing data...';
+        await loadAdminOrders();
+      } catch (error) {
+        console.error(error);
+        if (loadingEl) loadingEl.textContent = '';
+        alert(error.message || 'Failed to verify GCash payment.');
+      }
+    }
+
+async function loadAdminUsers() {
+  const container = document.getElementById('usersContainer');
+  container.innerHTML = '<div class="empty">Loading users...</div>';
+
+  try {
+    const user = JSON.parse(localStorage.getItem('user') || 'null');
+
+    if (!user || user.role !== 'admin') {
+      throw new Error('Access denied. Admin only.');
+    }
+
+    const res = await fetch(`${API_URL}/api/admin/users?adminId=${user.id}`);
+    const text = await res.text();
+
+    let data;
+    try {
+      data = JSON.parse(text);
+    } catch {
+      throw new Error(`Expected JSON, got: ${text}`);
+    }
+
+    if (!res.ok) {
+      throw new Error(data.message || 'Failed to fetch users');
+    }
+
+    ALL_USERS = Array.isArray(data) ? data : [];
+    renderUsers();
+  } catch (error) {
+    console.error('Load admin users error:', error);
+    container.innerHTML = `<div class="empty">${escapeHtml(error.message || 'Failed to load users.')}</div>`;
+  }
+}
+
+    function renderUsers() {
+      const container = document.getElementById('usersContainer');
+      const search = (document.getElementById('userSearchInput').value || '').trim().toLowerCase();
+      const statusFilter = (document.getElementById('userStatusFilter').value || 'all').toLowerCase();
+
+      let filtered = [...ALL_USERS];
+
+      if (statusFilter !== 'all') {
+        filtered = filtered.filter(user => String(user.status || '').toLowerCase() === statusFilter);
+      }
+
+      if (search) {
+        filtered = filtered.filter(user => {
+          const haystack = [
+            user.fullname,
+            user.email,
+            user.role,
+            user.emp_id,
+            user.status
+          ].map(v => String(v || '').toLowerCase()).join(' ');
+
+          return haystack.includes(search);
+        });
+      }
+
+      if (!filtered.length) {
+        container.innerHTML = '<div class="empty">No matching users found.</div>';
+        return;
+      }
+
+      container.innerHTML = filtered.map(user => `
+        <div class="admin-card" id="user-card-${user.userId}">
+          <div class="card-head" onclick="toggleCard('user-card-${user.userId}')">
+            <div class="head-block">
+              <div class="label">Full Name</div>
+              <div class="value">${escapeHtml(user.fullname || 'N/A')}</div>
+            </div>
+            <div class="head-block">
+              <div class="label">Email</div>
+              <div class="value">${escapeHtml(user.email || 'N/A')}</div>
+            </div>
+            <div class="head-block">
+              <div class="label">Role</div>
+              <div class="value">${escapeHtml(user.role || 'N/A')}</div>
+            </div>
+            <div class="head-block">
+              <div class="label">Employee ID</div>
+              <div class="value">${escapeHtml(user.emp_id || 'N/A')}</div>
+            </div>
+            <div class="head-block">
+              <div class="label">Status</div>
+              <div class="value">
+                <span class="user-badge ${getUserStatusClass(user.status)}">${escapeHtml(user.status || 'N/A')}</span>
+              </div>
+            </div>
+            <div class="head-block">
+              <div class="label">Created</div>
+              <div class="value">${escapeHtml(user.created_at || 'N/A')}</div>
+            </div>
+            <div class="card-toggle">
+              <button class="toggle-btn" type="button" onclick="event.stopPropagation(); toggleCard('user-card-${user.userId}')">+</button>
+            </div>
+          </div>
+
+          <div class="card-body">
+            <div class="user-extra">
+              <div class="user-row">
+                <div>
+                  <strong>User ID</strong>
+                  <div class="muted">${escapeHtml(user.userId)}</div>
+                </div>
+                <div>
+                  <strong>Role</strong>
+                  <div class="muted">${escapeHtml(user.role || 'N/A')}</div>
+                </div>
+              </div>
+              <div class="user-row">
+                <div>
+                  <strong>Status</strong>
+                  <div class="muted">${escapeHtml(user.status || 'N/A')}</div>
+                </div>
+                <div>
+                  <strong>Employee ID</strong>
+                  <div class="muted">${escapeHtml(user.emp_id || 'N/A')}</div>
+                </div>
+              </div>
+            </div>
+
+            <div class="action-box">
+              <div class="muted">Admin actions for this account</div>
+              <div class="actions">
+                ${
+                  String(user.status || '').toLowerCase() !== 'verified'
+                    ? `<button class="btn" onclick="prepareVerifyUser(${user.userId})">Verify User</button>`
+                    : `<button class="btn secondary" disabled>User Verified</button>`
+                }
+              </div>
+              <div id="user-loading-${user.userId}" class="loading-inline"></div>
+            </div>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function prepareVerifyUser(userId) {
+      const user = ALL_USERS.find(u => Number(u.userId) === Number(userId));
+
+      openActionModal({
+        title: 'Verify User Account',
+        text: 'Please confirm user verification.',
+        summaryHtml: `
+          <div class="modal-summary-grid">
+            <div><strong>Name:</strong> ${escapeHtml(user?.fullname || 'N/A')}</div>
+            <div><strong>Email:</strong> ${escapeHtml(user?.email || 'N/A')}</div>
+            <div><strong>Role:</strong> ${escapeHtml(user?.role || 'N/A')}</div>
+            <div><strong>Employee ID:</strong> ${escapeHtml(user?.emp_id || 'N/A')}</div>
+          </div>
+        `,
+        onConfirm: async () => {
+          await verifyUser(userId);
+          closeActionModal();
+        }
+      });
+    }
+
+    async function verifyUser(userId) {
+      const loadingEl = document.getElementById(`user-loading-${userId}`);
+
+      try {
+        if (loadingEl) loadingEl.textContent = 'Verifying user account...';
+
+        const res = await fetch(`${API_URL}/api/admin/users/${userId}/verify`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ adminId: adminUser.id })
+        });
+
+        const data = await res.json();
+
+        if (!res.ok) throw new Error(data.message || 'Failed to verify user');
+
+        if (loadingEl) loadingEl.textContent = 'User verified successfully. Refreshing users...';
+        await loadAdminUsers();
+      } catch (error) {
+        console.error(error);
+        if (loadingEl) loadingEl.textContent = '';
+        alert(error.message || 'Failed to verify user.');
+      }
+    }
+
+    async function loadAdminProducts() {
+  const container = document.getElementById('productsContainer');
+  if (!container) return;
+
+  container.innerHTML = '<div class="empty">Loading products...</div>';
+
+  try {
+    const res = await fetch(`${API_URL}/api/products`);
+    const data = await res.json();
+
+    if (!res.ok) {
+      throw new Error(data.message || 'Failed to fetch products');
+    }
+
+    ALL_PRODUCTS = Array.isArray(data) ? data : [];
+    renderProductsAdmin();
+  } catch (error) {
+    console.error('Load admin products error:', error);
+    container.innerHTML = `<div class="empty">${escapeHtml(error.message || 'Failed to load products.')}</div>`;
+  }
+}
+
+function renderProductsAdmin() {
+  const container = document.getElementById('productsContainer');
+  if (!container) return;
+
+  const search = (document.getElementById('productSearchInput')?.value || '').trim().toLowerCase();
+  const categoryFilter = document.getElementById('productCategoryFilter')?.value || 'all';
+
+  let filtered = [...ALL_PRODUCTS];
+
+  if (categoryFilter !== 'all') {
+    filtered = filtered.filter(product => String(product.category || '') === categoryFilter);
+  }
+
+  if (search) {
+    filtered = filtered.filter(product => {
+      const haystack = [
+        product.name,
+        product.category,
+        product.image,
+        product.description
+      ].map(v => String(v || '').toLowerCase()).join(' ');
+
+      return haystack.includes(search);
+    });
+  }
+
+  if (!filtered.length) {
+    container.innerHTML = '<div class="empty">No matching products found.</div>';
+    return;
+  }
+
+  container.innerHTML = filtered.map(product => `
+    <div class="admin-card" id="product-card-${product.id}">
+      <div class="card-head" onclick="toggleCard('product-card-${product.id}')">
+        <div class="head-block">
+          <div class="label">Product Name</div>
+          <div class="value">${escapeHtml(product.name || 'N/A')}</div>
+        </div>
+        <div class="head-block">
+          <div class="label">Category</div>
+          <div class="value">${escapeHtml(product.category || 'N/A')}</div>
+        </div>
+        <div class="head-block">
+          <div class="label">Price</div>
+          <div class="value">${fmt(product.price)}</div>
+        </div>
+        <div class="head-block">
+          <div class="label">Stock</div>
+          <div class="value">${Number(product.stock || 0)}</div>
+        </div>
+        <div class="head-block">
+          <div class="label">Image</div>
+          <div class="value">${escapeHtml(product.image || 'N/A')}</div>
+        </div>
+        <div class="head-block">
+          <div class="label">Description</div>
+          <div class="value">${escapeHtml(product.description || 'N/A')}</div>
+        </div>
+        <div class="card-toggle">
+          <button class="toggle-btn" type="button" onclick="event.stopPropagation(); toggleCard('product-card-${product.id}')">+</button>
+        </div>
+      </div>
+
+      <div class="card-body">
+        <div class="details-grid">
+          <div class="detail-box">
+            <div class="label">Product ID</div>
+            <div class="value">${product.id}</div>
+          </div>
+          <div class="detail-box">
+            <div class="label">Current Price</div>
+            <div class="value">${fmt(product.price)}</div>
+          </div>
+          <div class="detail-box">
+            <div class="label">Current Stock</div>
+            <div class="value">${Number(product.stock || 0)}</div>
+          </div>
+          <div class="detail-box full-span">
+            <div class="label">Description</div>
+            <div class="value">${escapeHtml(product.description || 'N/A')}</div>
+          </div>
+        </div>
+
+        <div class="section-title">Edit Product</div>
+        <div class="action-box">
+          <div class="action-grid">
+            <div>
+              <div class="muted action-label">Price</div>
+              <input
+                type="number"
+                step="0.01"
+                min="0"
+                class="action-select"
+                id="product-price-${product.id}"
+                value="${Number(product.price || 0)}"
+              >
+            </div>
+            <div>
+              <div class="muted action-label">Stock</div>
+              <input
+                type="number"
+                min="0"
+                class="action-select"
+                id="product-stock-${product.id}"
+                value="${Number(product.stock || 0)}"
+              >
+            </div>
+          </div>
+
+          <div class="actions">
+            <button class="btn" onclick="updateAdminProduct(${product.id})">Save Product</button>
+          </div>
+
+          <div id="product-loading-${product.id}" class="loading-inline"></div>
+        </div>
+      </div>
+    </div>
+  `).join('');
+}
+
+async function updateAdminProduct(productId) {
+  const product = ALL_PRODUCTS.find(p => Number(p.id) === Number(productId));
+  if (!product) {
+    alert('Product not found.');
+    return;
+  }
+
+  const priceEl = document.getElementById(`product-price-${productId}`);
+  const stockEl = document.getElementById(`product-stock-${productId}`);
+  const loadingEl = document.getElementById(`product-loading-${productId}`);
+
+  const newPrice = Number(priceEl?.value);
+  const newStock = Number(stockEl?.value);
+
+  if (isNaN(newPrice) || newPrice < 0) {
+    alert('Please enter a valid price.');
+    return;
+  }
+
+  if (isNaN(newStock) || newStock < 0) {
+    alert('Please enter a valid stock.');
+    return;
+  }
+
+  try {
+    if (loadingEl) loadingEl.textContent = 'Updating product...';
+
+    const res = await fetch(`${API_URL}/api/products/${productId}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        name: product.name,
+        category: product.category,
+        price: newPrice,
+        image: product.image,
+        stock: newStock,
+        description: product.description
+      })
+    });
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      throw new Error(data.message || 'Failed to update product');
+    }
+
+    if (loadingEl) loadingEl.textContent = 'Product updated successfully.';
+    await loadAdminProducts();
+  } catch (error) {
+    console.error('Update product error:', error);
+    if (loadingEl) loadingEl.textContent = '';
+    alert(error.message || 'Failed to update product.');
+  }
+}
+
+    function reloadSingleOrder(orderId) {
+      loadOrderHistoryInto(orderId);
+    }
+
+    function reloadOrderItems(orderId) {
+      loadOrderItemsInto(orderId);
+    }
+
+ function logoutAdmin() {
+  openLogoutModal();
+}
+
+function openLogoutModal() {
+  const modal = document.getElementById('logoutModal');
+  if (modal) {
+    modal.classList.add('open');
+    document.body.style.overflow = 'hidden';
+  }
+}
+
+function closeLogoutModal() {
+  const modal = document.getElementById('logoutModal');
+  if (modal) {
+    modal.classList.remove('open');
+    document.body.style.overflow = '';
+  }
+}
+
+function confirmLogoutAdmin() {
+  localStorage.removeItem('user');
+  closeLogoutModal();
+  window.location.href = 'index.html';
+}
+
+document.getElementById('searchInput')?.addEventListener('input', renderOrders);
+document.getElementById('statusFilter')?.addEventListener('change', renderOrders);
+document.getElementById('userSearchInput')?.addEventListener('input', renderUsers);
+document.getElementById('userStatusFilter')?.addEventListener('change', renderUsers);
+document.getElementById('productSearchInput')?.addEventListener('input', renderProductsAdmin);
+document.getElementById('productCategoryFilter')?.addEventListener('change', renderProductsAdmin);
+
+
+document.getElementById('actionModal')?.addEventListener('click', (e) => {
+  if (e.target.id === 'actionModal') closeActionModal();
+});
+
+document.getElementById('logoutModal')?.addEventListener('click', (e) => {
+  if (e.target.id === 'logoutModal') closeLogoutModal();
+});
+
+loadAdminOrders();
+loadAdminUsers();
+loadAdminProducts();
+  </script>
+</body>
+</html>

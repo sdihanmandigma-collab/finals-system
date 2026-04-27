@@ -16,14 +16,17 @@
   <div class="container">
     <div class="dashboard-navbar">
 
-      <a href="dashboard.html" class="logo">
+      <a href="dashboard.html" class="logo brand-logo">
         <img src="img/logo.jpg" alt="MCP Logo">
+        <div class="brand-text">
+          <span class="brand-name">MCP Cooperative</span>
+          <span class="brand-sub">San Jose, Batangas</span>
+        </div>
       </a>
 
-      
-      <div class="dashboard-nav-links">
-        <a href="#" class="top-nav-link active" data-nav="home" onclick="showSection('homeSection'); setTopNav(this); return false;">Home</a>
-        <a href="#" class="top-nav-link" data-nav="products" onclick="showSection('productsSection'); setTopNav(this); return false;">Shop</a>
+      <div class="dashboard-nav-links dashboard-nav-links-elegant">
+        <a href="#" class="top-nav-link active" data-nav="home" onclick="showSection('homeSection'); setTopNav(this); window.scrollTo({ top: 0, behavior: 'smooth' }); return false;">Home</a>
+        <a href="#" class="top-nav-link" data-nav="products" onclick="showSection('productsSection'); setTopNav(this); window.scrollTo({ top: 0, behavior: 'smooth' }); return false;">Shop</a>
         <a href="#" class="top-nav-link" data-nav="contact" onclick="scrollToContact(); setTopNav(this); return false;">Contact</a>
       </div>
 
@@ -41,7 +44,7 @@
         <div class="account-area">
           <button class="account-btn" id="accountToggle">
             <span class="account-avatar">C</span>
-            <span>My Account</span>
+            <span id="accountName">My Account</span>
           </button>
 
           <div class="account-dropdown" id="accountDropdown">
@@ -50,9 +53,8 @@
             <a href="#" class="dropdown-link" onclick="showSection('paymentsSection'); return false;">Payments</a>
             <a href="#" class="dropdown-link" onclick="showSection('profileSection'); return false;">Profile</a>
             <a href="#" class="dropdown-link" onclick="showSection('addressSection'); return false;">Address Book</a>
-            <a href="#" class="dropdown-link" onclick="showSection('notificationsSection'); return false;">Notifications</a>
             <a href="#" class="dropdown-link" onclick="showSection('supportSection'); return false;">Support / Help</a>
-            <a href="#" class="dropdown-link logout-link" onclick="logoutUser(); return false;">Log Out</a>
+            <a href="#" class="dropdown-link logout-link" onclick="openLogoutModal(); return false;">Log Out</a>
           </div>
         </div>
       </div>
@@ -72,28 +74,35 @@
           <div class="promo-slider">
             <div class="promo-bg" id="promoBg"></div>
 
-            <div class="promo-overlay">
-              <div class="badge">📍 EST. SAN JOSE, BATANGAS</div>
-              <h1 class="promo-title">Your Community’s <em>Trusted</em> Store</h1>
-              <p class="promo-desc">From fresh produce to daily essentials — shop smarter, live better.</p>
+  <div class="promo-overlay">
+  <div class="promo-badge-row">
+    <div class="badge" id="promoBadge">⚡ LIMITED-TIME PROMO</div>
+    <div class="promo-location" id="promoLocation">📍 EST. SAN JOSE, BATANGAS</div>
+  </div>
 
-              <div class="feature-row">
-                <div class="feature-pill">🥬 Fresh Daily</div>
-                <div class="feature-pill">🚚 Fast Delivery</div>
-                <div class="feature-pill">🏷 Member Savings</div>
-              </div>
+  <h1 class="promo-title" id="promoTitle">Flash Sale on <em>Daily Essentials</em></h1>
 
-              <div class="slide-actions">
-                <button class="btn-primary" onclick="showSection('productsSection')">Browse Products</button>
-                <button class="btn-outline" onclick="showSection('ordersSection')">My Orders</button>
-              </div>
-            </div>
+  <p class="promo-desc" id="promoDesc">
+    Save more on selected pantry, drinks, and household must-haves.
+  </p>
 
-            <div class="slider-dots">
-              <div class="dot active" onclick="goToSlide(0)"></div>
-              <div class="dot" onclick="goToSlide(1)"></div>
-              <div class="dot" onclick="goToSlide(2)"></div>
-            </div>
+  <div class="feature-row" id="promoFeatures">
+    <div class="feature-pill">🔥 Best Deals</div>
+    <div class="feature-pill">🚚 Fast Delivery</div>
+  </div>
+
+  <div class="slide-actions">
+    <button class="btn-primary" id="promoPrimaryBtn">Shop Deals</button>
+    <button class="btn-outline" id="promoSecondaryBtn">Browse Products</button>
+  </div>
+</div>
+
+  <div class="slider-dots">
+  <div class="dot active" onclick="goToSlide(0)"></div>
+  <div class="dot" onclick="goToSlide(1)"></div>
+  <div class="dot" onclick="goToSlide(2)"></div>
+  <div class="dot" onclick="goToSlide(3)"></div>
+</div>
           </div>
 
           <div class="shop-toolbar">
@@ -102,22 +111,16 @@
             </div>
 
             <div class="categories-row top-categories">
-              <button class="cat-btn active" onclick="filterProducts('all', this)">All</button>
-              <button class="cat-btn" onclick="filterProducts('Dairy', this)">Dairy</button>
-              <button class="cat-btn" onclick="filterProducts('Beverages', this)">Beverages</button>
-              <button class="cat-btn" onclick="filterProducts('Drinks', this)">Drinks</button>
-              <button class="cat-btn" onclick="filterProducts('Softdrinks', this)">Softdrinks</button>
-              <button class="cat-btn" onclick="filterProducts('Snacks', this)">Snacks</button>
-              <button class="cat-btn" onclick="filterProducts('Pantry', this)">Pantry</button>
-              <button class="cat-btn" onclick="filterProducts('Frozen Food', this)">Frozen Food</button>
-              <button class="cat-btn" onclick="filterProducts('Spreads', this)">Spreads</button>
-              <button class="cat-btn" onclick="filterProducts('Hygiene', this)">Hygiene</button>
-              <button class="cat-btn" onclick="filterProducts('Cleaning', this)">Cleaning</button>
-            </div>
+  <button class="cat-btn active" onclick="filterProducts('all', this)">All</button>
+  <button class="cat-btn" onclick="filterProducts('Staples', this)">Staples</button>
+  <button class="cat-btn" onclick="filterProducts('Essentials', this)">Essentials</button>
+  <button class="cat-btn" onclick="filterProducts('Dairy', this)">Dairy</button>
+  <button class="cat-btn" onclick="filterProducts('Pantry', this)">Pantry</button>
+</div>
 
             <div class="toolbar-search">
               <span>🔍</span>
-              <input type="text" id="productSearch" placeholder="Search items in dashboard..." autocomplete="off">
+              <input type="text" id="productSearch" placeholder="Search items..." autocomplete="off">
             </div>
           </div>
 
@@ -131,19 +134,13 @@
               <div class="muted">Browse available products and add to cart.</div>
             </div>
 
-            <div class="categories-row top-categories" style="margin-bottom:16px;">
-              <button class="cat-btn active" onclick="filterProducts('all', this)">All</button>
-              <button class="cat-btn" onclick="filterProducts('Dairy', this)">Dairy</button>
-              <button class="cat-btn" onclick="filterProducts('Beverages', this)">Beverages</button>
-              <button class="cat-btn" onclick="filterProducts('Drinks', this)">Drinks</button>
-              <button class="cat-btn" onclick="filterProducts('Softdrinks', this)">Softdrinks</button>
-              <button class="cat-btn" onclick="filterProducts('Snacks', this)">Snacks</button>
-              <button class="cat-btn" onclick="filterProducts('Pantry', this)">Pantry</button>
-              <button class="cat-btn" onclick="filterProducts('Frozen Food', this)">Frozen Food</button>
-              <button class="cat-btn" onclick="filterProducts('Spreads', this)">Spreads</button>
-              <button class="cat-btn" onclick="filterProducts('Hygiene', this)">Hygiene</button>
-              <button class="cat-btn" onclick="filterProducts('Cleaning', this)">Cleaning</button>
-            </div>
+           <div class="categories-row top-categories" style="margin-bottom:16px;">
+  <button class="cat-btn active" onclick="filterProducts('all', this)">All</button>
+  <button class="cat-btn" onclick="filterProducts('Staples', this)">Staples</button>
+  <button class="cat-btn" onclick="filterProducts('Essentials', this)">Essentials</button>
+  <button class="cat-btn" onclick="filterProducts('Dairy', this)">Dairy</button>
+  <button class="cat-btn" onclick="filterProducts('Pantry', this)">Pantry</button>
+</div>
 
             <div class="toolbar-search" style="margin-bottom:16px;">
               <span>🔍</span>
@@ -154,78 +151,87 @@
           </div>
         </section>
 
+
         <section id="ordersSection" class="page-section hidden">
-          <div class="content-card">
-            <div class="section-head">
-              <h2>My Orders</h2>
-              <div class="muted">History ng orders, status, at order details.</div>
-            </div>
+  <div class="content-card">
+    <div class="section-head">
+      <h2>My Orders</h2>
+      <div class="muted">Track your placed orders and view order details.</div>
+    </div>
 
-            <table>
-              <thead>
-                <tr>
-                  <th>Order ID</th>
-                  <th>Date</th>
-                  <th>Status</th>
-                  <th>Items</th>
-                  <th>Total</th>
-                  <th>Order Details</th>
-                </tr>
-              </thead>
-              <tbody id="ordersTableBody"></tbody>
-            </table>
+    <div class="table-wrap">
+      <table class="orders-table" style="width:100%; border-collapse:collapse;">
+        <thead>
+          <tr>
+            <th style="text-align:left; padding:12px;">Order Code</th>
+            <th style="text-align:left; padding:12px;">Date</th>
+            <th style="text-align:left; padding:12px;">Status</th>
+            <th style="text-align:left; padding:12px;">Items</th>
+            <th style="text-align:left; padding:12px;">Total</th>
+            <th style="text-align:left; padding:12px;">Action</th>
+          </tr>
+        </thead>
+        <tbody id="ordersTableBody">
+          <tr>
+            <td colspan="6" class="muted" style="padding:12px;">No orders yet.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+    <section id="paymentsSection" class="page-section hidden">
+  <div class="content-card">
+    <div class="section-head">
+      <h2>Payments</h2>
+      <div class="muted">Payment methods and payment history.</div>
+    </div>
+
+    <div class="two-col">
+      <div>
+       <div class="payment-card">
+  <div class="pay-top">
+    <div>
+      <h4>GCash</h4>
+      <p class="muted">Scan QR and send payment via GCash</p>
+    </div>
+    <span class="default-badge">Available</span>
+  </div>
+</div>
+
+<div class="payment-card">
+  <div class="pay-top">
+    <div>
+      <h4>Cash on Delivery</h4>
+      <p class="muted">Pay when your order arrives</p>
+    </div>
+    <span class="default-badge">Available</span>
+  </div>
+</div>
+
+        <div class="payment-card">
+          <div class="pay-top">
+            <div>
+              <h4>Card</h4>
+              <p class="muted">Debit or Credit Card payment</p>
+            </div>
+            <span class="default-badge">Available</span>
           </div>
-        </section>
+        </div>
+      </div>
 
-        <section id="paymentsSection" class="page-section hidden">
-          <div class="content-card">
-            <div class="section-head">
-              <h2>Payments</h2>
-              <div class="muted">Payment methods and payment history.</div>
-            </div>
-
-            <div class="two-col">
-              <div>
-                <div class="payment-card">
-                  <div class="pay-top">
-                    <div>
-                      <h4>GCash</h4>
-                      <p class="muted">Fast mobile wallet payment</p>
-                    </div>
-                    <span class="default-badge">Available</span>
-                  </div>
-                </div>
-
-                <div class="payment-card">
-                  <div class="pay-top">
-                    <div>
-                      <h4>Cash on Delivery</h4>
-                      <p class="muted">Pay when your order arrives</p>
-                    </div>
-                    <span class="default-badge">Available</span>
-                  </div>
-                </div>
-
-                <div class="payment-card">
-                  <div class="pay-top">
-                    <div>
-                      <h4>Card</h4>
-                      <p class="muted">Debit or Credit Card payment</p>
-                    </div>
-                    <span class="default-badge">Available</span>
-                  </div>
-                </div>
-              </div>
-
-              <div>
-                <div class="payment-card">
-                  <h4 style="margin-bottom:12px;">Payment History</h4>
-                  <p class="muted">Orders are now coming from database.</p>
-                </div>
-              </div>
-            </div>
+      <div>
+        <div class="payment-card">
+          <h4 style="margin-bottom:12px;">Payment History</h4>
+          <div id="paymentsList">
+            <p class="muted">No payments yet.</p>
           </div>
-        </section>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
 
         <section id="profileSection" class="page-section hidden">
           <div class="content-card">
@@ -273,25 +279,53 @@
           </div>
         </section>
 
-        <section id="addressSection" class="page-section hidden">
-          <div class="content-card">
-            <div class="section-head">
-              <h2>Address Book</h2>
-              <div class="muted">Save multiple addresses and set default address.</div>
-            </div>
+       <section id="addressSection" class="page-section hidden">
+  <div class="content-card">
+    <div class="section-head">
+      <h2>Address Book</h2>
+      <div class="muted">Save multiple addresses and set default address.</div>
+    </div>
 
-            <div class="address-card">
-              <div class="address-top">
-                <div>
-                  <h4>Home Address</h4>
-                  <p class="muted">Block 1, Lot 2, Brgy. Sample, San Jose, Batangas</p>
-                </div>
-                <span class="default-badge">Default</span>
-              </div>
-              <button class="small-btn">Edit Address</button>
-            </div>
-          </div>
-        </section>
+    <form id="addressForm" class="address-form">
+      <div class="form-row">
+        <input type="text" id="addrFullName" placeholder="Full Name" required>
+        <input type="text" id="addrPhone" placeholder="Phone Number" required>
+      </div>
+
+      <div class="form-row">
+        <input type="text" id="addrHouseNo" placeholder="House No.">
+        <input type="text" id="addrStreet" placeholder="Street">
+      </div>
+
+   <div class="form-row">
+  <div class="select-wrap">
+    <select id="addrBarangay" class="address-select" required>
+      <option value="">Select Barangay</option>
+    </select>
+  </div>
+</div>
+
+<div class="form-row">
+  <input type="text" id="addrPostalCode" placeholder="Postal Code">
+</div>
+
+      <div class="form-row">
+        <input type="text" id="addrLandmark" placeholder="Landmark">
+      </div>
+
+    
+
+      <button type="submit" class="save-btn">Save Address</button>
+      <p id="addressMsg" class="form-msg"></p>
+    </form>
+
+    <hr style="margin:20px 0;">
+
+    <div id="addressList" class="address-list">
+      <p class="muted">No saved addresses yet.</p>
+    </div>
+  </div>
+</section>
 
         <section id="notificationsSection" class="page-section hidden">
           <div class="content-card">
@@ -413,38 +447,95 @@
         <div id="promoMsg" style="margin-top:8px; font-size:.9rem;"></div>
       </div>
 
-      <div class="payment-options">
-        <div class="payment-option active" onclick="selectPayment(this, 'GCash')">
-          <div>
-            <h4>GCash</h4>
-            <p>Fast and secure mobile payment</p>
-          </div>
-          <strong>📲</strong>
-        </div>
+    <div class="payment-options">
+  <div class="payment-option active" onclick="selectPayment(this, 'GCash')">
+    <div>
+      <h4>GCash</h4>
+      <p>Send payment to our GCash account</p>
+    </div>
+    <strong>📲</strong>
+  </div>
 
-        <div class="payment-option" onclick="selectPayment(this, 'COD')">
-          <div>
-            <h4>Cash on Delivery</h4>
-            <p>Pay upon receiving your order</p>
-          </div>
-          <strong>💵</strong>
-        </div>
+  <div class="payment-option" onclick="selectPayment(this, 'COD')">
+    <div>
+      <h4>Cash on Delivery</h4>
+      <p>Pay upon receiving your order</p>
+    </div>
+    <strong>💵</strong>
+  </div>
+</div>
 
-        <div class="payment-option" onclick="selectPayment(this, 'CARD')">
-          <div>
-            <h4>Card</h4>
-            <p>Debit or credit card payment</p>
-          </div>
-          <strong>💳</strong>
-        </div>
-      </div>
+<div id="gcashDetails" style="margin-top:16px; padding:16px; border:1px solid #e5dccf; border-radius:14px; background:#fffaf4;">
+  <h4 style="margin-bottom:8px;">GCash Payment Details</h4>
+  <p style="margin:4px 0;"><strong>GCash Number:</strong> 0917-123-4567</p>
+  <p style="margin:4px 0 12px;"><strong>Account Name:</strong> MCP Feed Basics Co.</p>
 
+  <div style="display:grid; gap:10px;">
+    <input
+      type="text"
+      id="gcashSenderName"
+      placeholder="Enter your GCash full name"
+      style="width:100%; padding:12px; border:1px solid #ddd; border-radius:10px;"
+    >
+
+    <input
+      type="text"
+      id="gcashReference"
+      placeholder="Enter GCash reference number"
+      style="width:100%; padding:12px; border:1px solid #ddd; border-radius:10px;"
+    >
+  </div>
+
+  <p class="muted" style="margin-top:10px; font-size:.9rem;">
+    Please send your payment first before placing your order.
+  </p>
+</div>
       <button class="place-order-btn" onclick="placeOrder()">PLACE ORDER</button>
     </div>
   </div>
 
   <div id="toastContainer" class="toast-container"></div>
 
-  <script src="dashboard.js"></script>
+  <div class="modal" id="orderDetailsModal">
+  <div class="modal-content order-details-modal-content">
+    <div class="modal-head">
+      <div>
+        <h2 style="margin-bottom:4px;">Order Details</h2>
+        <p class="muted">Complete information about your order</p>
+      </div>
+      <button class="close-btn" onclick="closeOrderDetailsModal()">×</button>
+    </div>
+
+    <div id="orderDetailsContent" class="order-details-content">
+      <p class="muted">Loading order details...</p>
+    </div>
+  </div>
+</div>
+<div class="modal" id="logoutModal">
+  <div class="modal-content simple-logout-modal">
+    <div class="modal-head">
+      <div>
+        <h2 class="simple-logout-title">Log Out</h2>
+        <p class="muted">Are you sure you want to log out?</p>
+      </div>
+      <button class="close-btn" onclick="closeLogoutModal()">×</button>
+    </div>
+
+    
+    <div class="logout-actions">
+      <button class="btn-outline logout-cancel-btn" onclick="closeLogoutModal()">Cancel</button>
+      <button class="btn-primary logout-confirm-btn" onclick="confirmLogout()">Log Out</button>
+    </div>
+  </div>
+</div>
+
+   <script src="dashboard.js"></script>
+
+  <footer class="site-footer">
+    <div class="site-footer-inner">
+      © 2025 MCP Cooperative. All rights reserved.
+    </div>
+  </footer>
 </body>
 </html>
+
